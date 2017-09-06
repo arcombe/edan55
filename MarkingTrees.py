@@ -51,18 +51,15 @@ class marking:
         print(self.tree)
             
     def tryMark(self, index):
-        
         if self.tree[index] == False:
-            "print(index)"
             self.tree[index] = True
             self.counter += 1
-            "print(self.tree)"
             self.checkOthers(index)
         else:
             pass
                             
     def checkOthers(self, index):
-        parent = index // 2
+        parent = ((index + 1 )// 2) - 1
         leftChild = index * 2 + 1
         rightChild = index * 2 + 2
         if parent != index:
@@ -76,14 +73,13 @@ class marking:
                     self.tryMark(parent)
             elif self.tree[index + 1]:
                 self.tryMark(parent)
-        elif leftChild < self.nodes:
+        if leftChild < self.nodes:
             if self.tree[leftChild]:
                 self.tryMark(rightChild)
             elif self.tree[rightChild]:
                 self.tryMark(leftChild)
                 
     def tryMark2(self, index):
-        
         if self.tree[index] == False:
             self.tree[index] = True
             self.checkOthers2(index)
@@ -92,7 +88,10 @@ class marking:
             pass
                 
     def checkOthers2(self, index):
-        parent = index // 2
+        if index != 0:
+            parent = (((index + 1 )// 2) - 1)
+        else:
+            parent = 0 
         leftChild = index * 2 + 1
         rightChild = index * 2 + 2
         if parent != index:
@@ -106,7 +105,7 @@ class marking:
                     self.tryMark2(parent)
             elif self.tree[index + 1]:
                 self.tryMark2(parent)
-        elif leftChild < self.nodes:
+        if leftChild < self.nodes:
             if self.tree[leftChild]:
                 self.tryMark2(rightChild)
             elif self.tree[rightChild]:
@@ -117,4 +116,4 @@ class marking:
         
 if __name__ == "__main__":
     m = marking(7)
-    m.second()
+    m.third()
