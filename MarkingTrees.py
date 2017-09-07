@@ -129,15 +129,13 @@ class marking:
     
         
 if __name__ == "__main__":
-    for i in range(2, 21):
-        rounds = pow(2,i) - 1
-        print()
-        print(rounds)
-        m = marking(rounds)
-        print(m.first())
+    result = np.zeros(1000)
+    m = marking(7)
+    for i in range(0, 1000):
+        result[i] = m.first()
         m.reset()
-        print(m.second())
-        m.reset()
-        print(m.third())
+    print(np.mean(result))
+    print(np.std(result))
         
+    
     
