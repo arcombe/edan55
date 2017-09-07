@@ -20,15 +20,22 @@ class marking:
         pass
         
     def first(self):
+        rounds = 0
+        
         while self.counter < self.nodes:
+            rounds += 1
             x = rd.randint(0, self.nodes - 1)
             "print(x)"
             self.tryMark(x)
             
+        return rounds
+            
     def second(self):
         self.indexTree = [x for x in range(self.nodes)]
+        rounds = 0
         
         for x in range(self.nodes - 1, 0, -1):
+            rounds += 1
             if self.counter == self.nodes:
                 break
             rand = rd.randint(0, x)
@@ -36,19 +43,21 @@ class marking:
             self.indexTree[rand] = self.indexTree[x]
             self.indexTree[x] = index
             self.tryMark(index)
-            
-        print(self.tree)
+
+        return rounds
             
     def third(self):
         self.indexTree = [x for x in range(self.nodes)]
+        rounds = 0
         
         while len(self.indexTree) > 1:
+            rounds += 1
             last = len(self.indexTree) - 1
             rand = rd.randint(0, last)
             index = self.indexTree[rand]
             self.tryMark2(index)
-        
-        print(self.tree)
+
+        return rounds
             
     def tryMark(self, index):
         if self.tree[index] == False:
@@ -59,7 +68,10 @@ class marking:
             pass
                             
     def checkOthers(self, index):
-        parent = ((index + 1 )// 2) - 1
+        if index != 0:
+            parent = (((index + 1 )// 2) - 1)
+        else:
+            parent = 0 
         leftChild = index * 2 + 1
         rightChild = index * 2 + 2
         if parent != index:
@@ -111,9 +123,21 @@ class marking:
             elif self.tree[rightChild]:
                 self.tryMark2(leftChild)
         
-            
-             
+    def reset(self):
+        self.__init__(self.nodes)
+        
+    
         
 if __name__ == "__main__":
-    m = marking(7)
-    m.third()
+    for i in range(2, 21):
+        rounds = pow(2,i) - 1
+        print()
+        print(rounds)
+        m = marking(rounds)
+        print(m.first())
+        m.reset()
+        print(m.second())
+        m.reset()
+        print(m.third())
+        
+    
