@@ -48,6 +48,7 @@ class marking:
             
     def third(self):
         self.indexTree = [x for x in range(self.nodes)]
+        self.indexAtTree = [x for x in range(self.nodes)]
         rounds = 0
         
         while len(self.indexTree) > 1:
@@ -58,7 +59,20 @@ class marking:
             self.tryMark2(index)
 
         return rounds
+    
+    def third2(self):
+        self.indexTree = [x for x in range(self.nodes)]
+        self.indexAt = [x for x in range(self.nodes)]
+        rounds = 0
+        
+        while self.counter < self.nodes:
+            rounds += 1
+            rand = rd.randint(0, self.nodes - self.counter - 1)
+            index = self.indexTree[rand]
+            self.tryMark3(index)
             
+        return rounds
+    
     def tryMark(self, index):
         if self.tree[index] == False:
             self.tree[index] = True
@@ -99,6 +113,26 @@ class marking:
         else:
             pass
                 
+    def tryMark3(self, index):
+        
+        if self.tree[index] == False:
+            self.tree[index] = True
+            self.counter += 1
+            
+            indexat = self.indexAt[index]
+            last = self.indexTree[self.nodes - self.counter]
+            
+            self.indexTree[indexat] = last
+            self.indexTree[self.nodes - self.counter] = index
+            
+            self.indexAt[last] = indexat
+            self.indexAt[index] = self.nodes - self.counter
+            
+            self.checkOthers3(index)
+        else:
+            pass
+            
+        
     def checkOthers2(self, index):
         if index != 0:
             parent = (((index + 1 )// 2) - 1)
@@ -122,6 +156,30 @@ class marking:
                 self.tryMark2(rightChild)
             elif self.tree[rightChild]:
                 self.tryMark2(leftChild)
+                
+    def checkOthers3(self, index):
+        if index != 0:
+            parent = (((index + 1 )// 2) - 1)
+        else:
+            parent = 0 
+        leftChild = index * 2 + 1
+        rightChild = index * 2 + 2
+        if parent != index:
+            if self.tree[parent]:
+                if index % 2 == 0:
+                    self.tryMark3(index - 1)
+                else:
+                    self.tryMark3(index + 1)
+            if index % 2 == 0:
+                if self.tree[index - 1]:
+                    self.tryMark3(parent)
+            elif self.tree[index + 1]:
+                self.tryMark3(parent)
+        if leftChild < self.nodes:
+            if self.tree[leftChild]:
+                self.tryMark3(rightChild)
+            elif self.tree[rightChild]:
+                self.tryMark3(leftChild)
         
     def reset(self):
         self.__init__(self.nodes)
@@ -129,13 +187,15 @@ class marking:
     
         
 if __name__ == "__main__":
-    result = np.zeros(1000)
-    m = marking(7)
-    for i in range(0, 1000):
-        result[i] = m.first()
+    result = np.zeros(10)
+    x = 20
+    m = marking(pow(2,x) - 1)
+    for i in range(0, 10):
+        result[i] = m.third2()
         m.reset()
+    print(pow(2,x) - 1)
     print(np.mean(result))
     print(np.std(result))
-        
+    
     
     
