@@ -2,6 +2,7 @@ import scipy as sp
 import numpy as np
 import sys
 import random as rd
+import matplotlib.pyplot as plt
 
 class maxcut:
     
@@ -15,8 +16,19 @@ class maxcut:
             self.e[v2 - 1][v1 - 1] = w
         
     def __call__(self):
-        print(maxc.sr())
-    
+        resultR = np.zeros(100)
+        #resultS = np.zeros(100)
+        #resultRS = np.zeros(100)
+        for x in range(100):
+            A, B, sum = self.r()
+            resultR[x] = sum
+        mean = np.mean(resultR)
+        var = np.max(resultR)
+        print(mean)
+        print(var)
+        
+        
+        
     def r(self):
         A = []
         B = []
@@ -55,7 +67,7 @@ class maxcut:
                     A.append(x)
                     sum += value_B - value_A
     
-        return sum
+        return A, B, sum
     
     def __get_sum(self, v, A):
         sum = 0

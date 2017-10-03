@@ -1,0 +1,742 @@
+\documentclass{tufte-handout}
+\usepackage{amsmath,amsthm}
+
+\input{vc.tex}
+
+\usepackage{pgfplots}
+\pgfplotsset{width=\textwidth,compat=1.5.1}
+
+\newtheorem{claim}{Claim}[section]
+\title{\sf Approximation Algorithm for Maximum Cut}
+%\date{\GITAuthorDate}
+%\author{Thore Husfeldt}
+
+\begin{document}
+\maketitle
+\footnotetext{rev. \GITAbrHash}
+
+\section{Maximum Cut}
+Consider an undirected graph $G=(V,E)$ with positive edge weights
+$w(e)$ $(e\in E)$.
+Set $n=|V|$ and $m=|E|$.
+The Maximum Cut problem (Maxcut) is to find a partition of the
+vertices with the largest total weight of the edges ``crossing'' the
+partition, i.e., maximising the value of \[c(A)= \sum_{(u,v)\in E,
+  u\in A, v\notin A} w(u,v)\,\] over all $A\subseteq V$.
+
+Maxcut is NP-hard, so we have little hope of writing an algorithm that
+solves arbitrary Maxcut instances optimally.
+
+\subsection{ Algorithm R}
+
+Consider the following simple randomized algorithm (call it
+Algorithm~R): Let $A$ be a \emph{random subset} of $V$ constructed by
+flipping a coin $r(v)\in\{0,1\}$ for every vertex $v\in V$ and setting
+$v\in A$ if and only if $r(v)=1$.
+
+\subsection{Inputs}
+The  data directory contains two input instances:
+\begin{description}
+\item[ pw09\_100.9.txt:] A random instance with $|V|=100$ and
+  $|E|=4455$. The best cut in this instance is
+  13658.\sidenote{A. Wiegele, Biq Mac Library - A collection of Max-Cut
+    and quadratic 0-1 programming instances of medium size, 2007.}
+\item[ matching\_1000.txt:] A disjoint union of 500 edges with unit weight.
+\end{description}
+
+The input format is straightforward: the first line contains $n$ and
+$m$; every following line describes an edge in the format first
+vertex, second vertex, weight.
+All weights are integers, vertices are numbered $1,2,\ldots, n$.
+
+\subsection{Algorithm S}
+Consider the following simple greedy swapping algorithm (call it 
+Algorithm~S): Let all the verticies be outside of $A$ to begin with.
+A vetrex can be swapped, which means that if it's outside of $A$ its moved into
+$A$ and if its inside $A$ its moved out of $A$.
+Pick the first vertex you can find that increases your cut if swapped.
+Swap this vetrex, and continue doing so until no vertex increases the cut
+if swapped, eg you find a local maxima.
+
+\subsection{Algorithm RS}
+Consider the following simple randomized swapping algorithm (call
+it Algorithm~RS): Combine Algorithm R and S by instead of placing
+all vertices outside of $A$ to begin with in S, place the verticies according
+to the output of R. Then proceed with the swapping part of S.
+
+\subsection{ Deliverables}
+
+\begin{enumerate}
+\item Implement algorithm R, S and RS and run it on the dataset provided in
+  the data directory.
+  Use whatever programming language and libraries you want, but make
+  sure that your code is short and crisp; Each of the algorithms should 
+  not be much more than 20 lines. Reading input + scoring should also be
+  small. Making all the code together less than 100 lines is a suitable goal.
+  Attach a printout of the code to the report.
+\item Fill out the report on the next page; you can just use the
+  \LaTeX\ code if you want.
+\end{enumerate}
+
+\newpage
+
+
+\newpage
+\section{Maxcut Lab Report}
+
+
+by Alice Cooper and Bob Marley\sidenote{Complete the report by filling
+  in your names and the parts marked $[\ldots]$.
+  Remove the sidenotes in your final hand-in.}
+
+\subsection{Running time}
+
+\begin{tabular}{ c c c }
+    Algorithm~R & Algorithm~S & Algorithm~RS \\ 
+    $[\ldots]$ & $[\ldots]$ & $[\ldots]$ 
+\end{tabular}\sidenote{Replace each
+  $[\ldots]$ by a function of a subset of the parameters $\{n, m, W\}$, where $W = \sum_{e \in E}w(e)$.
+  Use asymptotic notation.}
+
+\subsection{Randomness}
+
+Algorithm R uses $[\ldots]$\sidenote{Replace
+  $[\ldots]$ by a function of $n$ and/or $m$. Do not use asymptotic
+  notation. This is supposed to be easy.} random bits.
+
+\subsection{Solution quality}
+
+\paragraph{Experiments.}
+
+\begin{enumerate}
+\item
+For the input file  pw09\_100.9.txt with $t=100$ runs, we found
+for each algorithm, the average cutsize $Avg(C)$ and the maximum cutsize $Max(C)$:
+
+\begin{tabular}{ l c c }
+    Algorithm & $Avg(C)$ & $Max(C)$ \\ 
+    R & $12378.41$ & $12697.0$ \\
+    S & $13507.0$ & $[13507.0$ \\
+    RS & $13530.16$ & $13658.0$
+\end{tabular}\sidenote{Replace each $[\ldots]$
+with the values obtained by running your experiments.}
+\medskip
+
+The optimum was given to us as $\operatorname{OPT} = 13658$.
+
+\medskip
+
+The distribution of cutsizes for Algorithm~R looks as follows:\sidenote{Display your
+  cutsizes as a histogram. Use whatever software you like to produce
+  the image; the placeholder image on the left is constructed in the
+  \LaTeX\ source.}
+  
+  \noindent
+\begin{tikzpicture}
+\begin{axis}[
+  height= 5cm,
+  ybar interval,
+  xmin = 0,  xmax = 13658,
+  xtick =       {0   ,   5000,   10000, 13658},
+  xticklabels = { $0$, $5000$, $10000$,   OPT},
+  x tick label as interval = false,
+  scaled ticks = false
+]
+    \addplot+[hist={bins=100}]
+        table[y index=0] {
+          % output of 
+          % perl -e "for $i (1..100) { system 'python sol/rmaxcut.py < data/pw09_100.9.txt '}"
+12694  
+12251
+12029
+12394
+12460
+12588
+12422
+12326
+12004
+12128
+11989
+12474
+12118
+12483
+12081
+12192
+12234
+12499
+12164
+12487
+11732
+12412
+12386
+12152
+12522
+12243.
+12155
+12526
+12545
+12368
+12538
+12056
+12377
+12205
+12272.
+12467
+12650
+12328
+12401
+12458
+12446
+12001
+12432
+12373.
+12246.  
+12518
+12521
+12240
+12365
+12470
+12531
+12307
+12428.
+12452.  
+12526
+12404
+12633
+12090
+12344
+12334
+12481
+12730.
+12381
+12288
+12246
+12134
+12344
+12267
+12586
+12453
+12292.
+12214.  
+12521
+12493
+12370
+12335
+12422
+12274
+12593
+12279.
+12561
+12641
+12309
+12184
+12290
+12622
+12596
+12402
+11177.
+12555
+11950
+12474
+12686
+12573
+12329
+12441
+12290
+12499.
+12110.
+    };
+\end{axis}
+\end{tikzpicture}
+
+\medskip
+
+\noindent
+
+The distribution of cutsizes for Algorithm~RS looks as follows: $[\ldots]$
+\sidenote{Display a plot similar to the histogram for Algorithm~R, but instead for Algorithm~RS.}
+
+\begin{tikzpicture}
+\begin{axis}[
+  height= 5cm,
+  ybar interval,
+  xmin = 0,  xmax = 13658,
+  xtick =       {0   ,   5000,   10000, 13658},
+  xticklabels = { $0$, $5000$, $10000$,   OPT},
+  x tick label as interval = false,
+  scaled ticks = false
+]
+    \addplot+[hist={bins=100}]
+        table[y index=0] {
+          % output of 
+          % perl -e "for $i (1..100) { system 'python sol/rmaxcut.py < data/pw09_100.9.txt '}"
+13495.0
+13523.0
+13534.0
+13498.0
+13591.0
+13447.0
+13539.0
+13507.0
+13543.0
+13470.0
+13519.0
+13492.0
+13508.0
+13504.0
+13441.0
+13577.0
+13583.0
+13560.0
+13655.0
+13551.0
+13383.0
+13491.0
+13494.0
+13551.0
+13645.0
+13526.0
+13493.0
+13572.0
+13627.0
+13481.0
+13487.0
+13497.0
+13579.0
+13605.0
+13548.0
+13411.0
+13509.0
+13500.0
+13637.0
+13607.0
+13492.0
+13438.0
+13619.0
+13523.0
+13629.0
+13514.0
+13422.0
+13520.0
+13495.0
+13551.0
+13420.0
+13570.0
+13501.0
+13621.0
+13504.0
+13514.0
+13542.0
+13549.0
+13524.0
+13550.0
+13458.0
+13624.0
+13618.0
+13437.0
+13575.0
+13606.0
+13584.0
+13426.0
+13592.0
+13650.0
+13619.0
+13458.0
+13401.0
+13543.0
+13515.0
+13487.0
+13449.0
+13658.0
+13578.0
+13411.0
+13506.0
+13529.0
+13497.0
+13531.0
+13453.0
+13529.0
+13586.0
+13582.0
+13511.0
+13532.0
+13497.0
+13526.0
+13484.0
+13550.0
+13537.0
+13467.0
+13570.0
+13468.0
+13610.0
+13504.0
+    };
+\end{axis}
+\end{tikzpicture}
+
+
+\item
+For the input file matching\_1000.txt
+$[\ldots]$\sidenote{Perform the same analysis for 
+    matching\_1000.txt. This involves thinking to determine OPT.}
+\end{enumerate}
+
+For the input file  pw09\_100.9.txt with $t=100$ runs, we found
+for each algorithm, the average cutsize $Avg(C)$ and the maximum cutsize $Max(C)$:
+
+\begin{tabular}{ l c c }
+    Algorithm & $Avg(C)$ & $Max(C)$ \\ 
+    R & $250.24$ & $273.0$ \\
+    S & $500$ & $500$ \\
+    RS & $500$ & $500$
+\end{tabular}\sidenote{Replace each $[\ldots]$
+with the values obtained by running your experiments.}
+\medskip
+
+The optimum was given to us as $\operatorname{OPT} = 500$.
+
+
+The distribution of cutsizes for Algorithm~R looks as follows:
+
+\begin{tikzpicture}
+\begin{axis}[
+  height= 5cm,
+  ybar interval,
+  xmin = 0,  xmax = 500,
+  xtick =       {0   ,   166,   344, 500},
+  xticklabels = { $0$, $166$, $344$,   OPT},
+  x tick label as interval = false,
+  scaled ticks = false
+]
+    \addplot+[hist={bins=100}]
+        table[y index=0] {
+          % output of 
+          % perl -e "for $i (1..100) { system 'python sol/rmaxcut.py < data/pw09_100.9.txt '}"
+253.0
+248.0
+237.0
+258.0
+239.0
+253.0
+245.0
+249.0
+259.0
+247.0
+236.0
+231.0
+259.0
+244.0
+236.0
+237.0
+255.0
+235.0
+275.0
+244.0
+245.0
+243.0
+253.0
+255.0
+246.0
+237.0
+241.0
+253.0
+241.0
+256.0
+234.0
+265.0
+235.0
+261.0
+257.0
+260.0
+238.0
+264.0
+256.0
+243.0
+249.0
+247.0
+258.0
+249.0
+254.0
+254.0
+248.0
+231.0
+252.0
+252.0
+253.0
+245.0
+256.0
+235.0
+236.0
+255.0
+244.0
+244.0
+261.0
+251.0
+254.0
+242.0
+225.0
+253.0
+263.0
+240.0
+244.0
+245.0
+248.0
+254.0
+240.0
+236.0
+261.0
+261.0
+265.0
+247.0
+247.0
+232.0
+265.0
+252.0
+246.0
+237.0
+248.0
+265.0
+253.0
+258.0
+252.0
+250.0
+266.0
+259.0
+245.0
+253.0
+240.0
+253.0
+240.0
+244.0
+259.0
+238.0
+264.0
+255.0
+    };
+\end{axis}
+\end{tikzpicture}
+
+The distribution of cutsizes for Algorithm~RS looks as follows:
+
+\begin{tikzpicture}
+\begin{axis}[
+  height= 5cm,
+  ybar interval,
+  xmin = 0,  xmax = 500,
+  xtick =       {0   ,   166,   344, 500},
+  xticklabels = { $0$, $166$, $344$,   OPT},
+  x tick label as interval = false,
+  scaled ticks = false
+]
+    \addplot+[hist={bins=100}]
+        table[y index=0] {
+          % output of 
+          % perl -e "for $i (1..100) { system 'python sol/rmaxcut.py < data/pw09_100.9.txt '}"
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+500
+    };
+\end{axis}
+\end{tikzpicture}
+
+
+\paragraph{Analysis of performance guarantee}
+
+Clearly, Algorithm~R performs quite badly on input 
+  matching\_1000.txt.
+We will show that it can perform \emph{no worse} than that, i.e., we
+will establish that in expectation, the cutsize $C$ satisfies $C \geq
+[\ldots]\cdot \operatorname{OPT}$.\sidenote{Replace [\ldots] by the
+  right constant}
+
+
+We will view $C$ as a random variable that gives the size of the cut
+defined by the random choices.
+Let $W$ denote the total weight of the edges of $G$, i.e.,
+\[ W= \sum_{e\in E} w(e)\,.\]
+
+Then,
+\begin{equation}\label{eq: E[C]}
+E[C] = \textstyle\frac{1}{2}\cdot W\,.
+\end{equation}
+
+To see this, define the indicator random variable $X_{uv}$ for every
+edge $uv\in E$ as follows.
+Set $X_{uv}=1$ if $uv$ crosses the cut, i.e., $u\in A$ and $v\notin A$
+or $u\notin A$ and $v\in A$.
+Otherwise, $X_{uv} = 0$.
+
+Then, $\Pr(X_{uv} = 1) = [\ldots]$.
+Now, $E[C]=[\ldots]$ Finally, we have 
+\(E[C]\geq [\ldots]\cdot \text{OPT}\) because clearly
+$[\ldots]$.\sidenote{Fill in the missing blanks in this paragraph.
+  Your calculations and arguments need to include phrases like
+  ``because BLA and BLA are independent'' or ``disjoint,'' and ``by
+  linearity of expectation'' and ``because the weights are positive.''
+}
+
+\bigskip
+Algorithms~S and RS perform very well on input matching\_1000.txt. In fact
+both algorithms always find the optimum. The reason for this is that local maxima and local minima exist.
+\sidenote{Explain why the optimum is always found.}.
+
+However Algorithm~RS does not always find the optimum even for all bipartite graphs. 
+An example of this scenario is the graph $G$,
+\begin{tikzpicture}[every node/.style={draw,circle}]
+  \node (1) at (0,1)  { 1 };
+  \node (2) at (1,1)  { 2 };
+  \node (3) at (0,0) { 3 };
+  \node (4) at (1,0) { 4 };
+  \draw[-] (1) edge (2);
+  \draw[-] (2) edge (3);
+  \draw[-] (3) edge (4);
+\end{tikzpicture}
+
+\bigskip
+
+Where the weight of the edges are
+
+\medskip
+
+\begin{tabular} {c c c}
+    u & v & weight \\
+    1 & 2 & $[2]$ \\
+    2 & 3 & $[1]$ \\
+    3 & 4 & $[2]$
+\end{tabular}\sidenote{Fill in weights of the edges in the graph such 
+that the graph has a local maxima less than the global maxima.}
+\medskip
+
+Here if nodes $[2,3]$ are inside $A$, Algorithm~RS gets stuck in a local maxima of size $[4]$. The global maxima has size $[5]$, with nodes $1$ and $3$ inside $A$.\sidenote{Fill in the blanks so the sentence makes sense.}
+
+\newpage
+\section{Perspective}
+To establish that Maxcut is NP-hard one reduces from NAE-Sat, a
+reduction that can be found in many places\sidenote{C. Moore and
+S. Mertens, \emph{The Nature of Computation}, Oxford University Press,
+  2011, p. 146.}
+Recall that the related problem \emph{Minimum Cut} is easy because of
+the max flow--min cut theorem.
+A moment's thought should convince you that as soon as negative
+weights are allowed, the two problems are the same (and both are
+hard).
+Algorithm R doesn't work at all for negative weights.
+
+Algorithm R is a classical randomised approximation algorithm, its
+origins seem to be shrouded in the mists of time.
+The \emph{deterministic} algorithm of Sahni and Gonzales\sidenote{S.\
+  Sahni and T.\ Gonzalez.
+  P-complete approximation problems.
+  \emph{J.\ Assoc.\ Comput.\ Mach.}, 23(3):555--565, 1976.}
+can be viewed as a derandomisation of R using the \emph{method of
+  conditional expectations}.
+These algorithms were best knows until the breakthrough result of
+Goemans and Williamson,\sidenote{M.\ X.\ Goemans and D.\ P.\
+  Williamson.
+  Improved approximation algorithms for maximum cut and satisfiability
+  problems using semidefinite programming.
+  \emph{J.\ Assoc.\ Comput.\ Mach.}, 42(6):1115--1145, 1995.}
+which improved the approximation factor to $0.87856$.
+H\aa{}stad has shown that no algorithm can approximate the maxcut
+better than $16/17\sim 0.941176$ unless P equals NP. Khot has shown
+that the Goemans--Williamson bound is essentially optimal under the
+\emph{Unique Games Conjecture}.
+
+\end{document}
