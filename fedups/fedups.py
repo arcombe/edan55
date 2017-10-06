@@ -8,6 +8,7 @@ from  pylab import *
 import numpy as np
 import sys
 import random as rd
+import copy
 
 class Road:
     
@@ -55,6 +56,8 @@ class Fedups:
         self.F = int(first_line[3])
         self.P = int(first_line[4])
         
+        self.H_start = self.H
+        
         self.pMatrix = np.array([np.array([0.0 for _ in range(self.N)]) for _ in range(self.N)])
         self.time = np.array([0.0 for _ in range(self.N)])
         
@@ -71,6 +74,8 @@ class Fedups:
         self.time[1] = -11.0
         self.time[2] = -3.0"""
         
+        self.links = [[] for _ in range(self.N)]
+        
         for _ in range(self.M):
             line = f.readline()
             line = line[:-1]
@@ -84,56 +89,128 @@ class Fedups:
             self.pMatrix[v, u] = pvu
             self.time[u] += t * puv
             self.time[v] += t * pvu
-            
+            if puv != 0.0:
+                self.links[u].append(v)
+            if pvu != 0.0:
+                self.links[v].append(u)
+        
     def __call1__(self):
         fed = []
         post = []
-        for x in range(1000):
+        for x in range(1):
             fed.append(self.monte_carlo(self.F, self.H))
             post.append(self.monte_carlo(self.P, self.H))
         print(np.mean(fed), " ", np.mean(post))
         
     def __call__(self):
-        self.markov()
-        print("FedUPS: ", self.time[self.F])
-        print("PostNHL: ", self.time[self.P])
+        self.M = []
+        self.t = []
+        if self.build_matrix(self.F, self.H, 'f') == 0:
+            print("FedUPS has no solution")
+        else:
+            t = self.markov(self.M, self.t)
+            print("FedUPS: ", t[self.F])
         
-    def markov(self):
-        for x in range(self.N):
-            self.pMatrix[x,x] -= 1
-            
-        self.time = -1*self.time
+        self.H = self.H_start
+        if self.build_matrix(self.P, self.H, 'p') == 0:
+            print("PostNHL has no solution")
+        else:
+            t = self.markov(self.M, self.t)
+            print("PostNHL: ", t[self.P])
+    
+    def build_matrix(self, s, f, typ):
+        self.finish = 0
+        self.taken = []
+        self.__build_path__(s)
         
-        for pivot_index in range(self.N):
+        if self.finish == 0:
+            return 0
+        
+        l = len(self.taken)
+        if l == self.N:
+            self.M = copy.deepcopy(self.pMatrix)
+            self.t = copy.deepcopy(self.time)
+            return 1
+        
+        pM = np.array([np.array([0.0 for _ in range(l)]) for _ in range(l)])
+        t = np.array([0.0 for _ in range(l)])
+        
+        
+        
+        not_in_path = np.array([x for x in range(self.N - 1, -1, -1)])
+        for x in self.taken:
+            index = np.argwhere(not_in_path==x)
+            not_in_path = np.delete(not_in_path, index)
+        
+        for x in range(l):
+            v = self.taken[x]
+            if v == s:
+                if typ == 'f':
+                    self.F = x
+                else:
+                    self.P = x
+            if v == f:
+                self.H = x
+            vect = copy.copy(self.pMatrix[v])
+            for y in not_in_path:
+                vect = np.delete(vect, y)        
+            pM[x] = vect
+            t[x] = self.time[v]
             
-            pivot = self.pMatrix[pivot_index, pivot_index]
+        self.M = pM
+        self.t = t
+        
+        return 1
+        
+        
+    def __build_path__(self, n):
+        if n == self.H:
+            self.finish = 1
+        self.taken.append(n)
+        for x in self.links[n]:
+            if x not in self.taken:
+                self.__build_path__(x)
+        
+    
+    def markov(self, pMatrix, time):
+        l = len(pMatrix)
+        
+        for x in range(l):
+            pMatrix[x,x] -= 1
+        
+        time = -1*self.time
+        
+        
+        for pivot_index in range(l):
+            
+            pivot = pMatrix[pivot_index, pivot_index]
             if pivot == 0:
-                print("pivot = 0")
                 x = pivot_index + 1
-                while self.pMatrix[x, pivot_index] == 0.0:
-                    if x >= self.N:
-                        print("cant find solution")
+                while pMatrix[x, pivot_index] == 0.0:
                     x += 1
-                self.pMatrix[[x, pivot_index]] = self.pMatrix[[pivot_index, x]]
-                self.time[x], self.time[pivot_index] = self.time[pivot_index], self.time[x]
-                pivot = self.pMatrix[pivot_index, pivot_index]
+                    if x >= l:
+                        print("cant find solution")
+                        return 1
+                pMatrix[[x, pivot_index]] = pMatrix[[pivot_index, x]]
+                time[x], time[pivot_index] = time[pivot_index], time[x]
+                pivot = pMatrix[pivot_index, pivot_index]
             
-            for row in range(pivot_index + 1, self.N):
-                factor = self.pMatrix[row, pivot_index] / pivot
-                self.pMatrix[row] = self.pMatrix[row] - factor * self.pMatrix[pivot_index]
-                self.time[row] = self.time[row] - factor * self.time[pivot_index]
+            for row in range(pivot_index + 1, l):
+                factor = pMatrix[row, pivot_index] / pivot
+                pMatrix[row] = pMatrix[row] - factor * pMatrix[pivot_index]
+                time[row] = time[row] - factor * time[pivot_index]
         
-        for x in range(self.N - 1, -1, -1):
+        for x in range(l - 1, -1, -1):
             for y in range(x):
-                factor = self.pMatrix[y,x] / self.pMatrix[x,x]
-                self.pMatrix[y] = self.pMatrix[y] - factor*self.pMatrix[x]
-                self.time[y] = self.time[y] - factor*self.time[x]
+                factor = pMatrix[y,x] / pMatrix[x,x]
+                pMatrix[y] = pMatrix[y] - factor*pMatrix[x]
+                time[y] = time[y] - factor*time[x]
             
-            selffactor = 1 / self.pMatrix[x,x]
-            self.pMatrix[x] = selffactor * self.pMatrix[x] 
-            self.time[x] = selffactor * self.time[x]
+            selffactor = 1 / pMatrix[x,x]
+            pMatrix[x] = selffactor * pMatrix[x] 
+            time[x] = selffactor * time[x]
         
-        return self.time
+        return time
         
     def monte_carlo(self, start, dest):
         current = start
